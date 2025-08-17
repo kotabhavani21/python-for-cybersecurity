@@ -1,0 +1,40 @@
+name: CI Python Project
+
+on:
+  workflow_dispatch:
+
+jobs:
+  CI_Non_containerization_build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          source venv/bin/activate
+          pytest tests/ -v
+
+      - name: Prepare Artifact
+        run: |
+          mkdir -p staging
+          cp -r src/ staging/
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: PythonPackage
+          path: staging
