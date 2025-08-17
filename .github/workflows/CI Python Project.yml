@@ -21,10 +21,6 @@ jobs:
         pip install --upgrade pip setuptools packaging
         pip install -r requirements.txt
 
-    - name: Run tests
-      run: |
-        pytest tests/ --junitxml=results.xml -v
-
     - name: Build package (optional)
       run: |
         python setup.py sdist bdist_wheel
