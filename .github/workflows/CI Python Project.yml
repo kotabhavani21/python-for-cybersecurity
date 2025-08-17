@@ -4,34 +4,38 @@ on:
   workflow_dispatch:
 
 jobs:
-  CI_Non_containerization_build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4.2.0
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5.6.0
-        with:
-          python-version: '3.12'
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
 
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip setuptools packaging
-          pip install -r requirements.txt
+    - name: Upgrade pip and install dependencies
+      run: |
+        pip install --upgrade pip setuptools packaging
+        pip install -r requirements.txt
 
-      - name: Run tests
-        run: |
-          pytest tests/ -v
+    - name: Run tests
+      run: |
+        pytest tests/ --junitxml=results.xml -v
 
-      - name: Prepare Artifact
-        run: |
-          mkdir -p staging
-          cp -r src/ staging/
+    - name: Build package (optional)
+      run: |
+        python setup.py sdist bdist_wheel
 
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: PythonPackage
-          path: staging
+    - name: Prepare artifact
+      run: |
+        mkdir -p staging
+        cp -r dist/* staging/ || echo "No dist files found"
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: PythonPackage
+        path: staging
